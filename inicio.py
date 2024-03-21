@@ -219,10 +219,7 @@ with st.expander("Prediccion por regresion lineal"):
     df_ultimo = df_ultimo[lista] # del ultimo registro solo guardamos las columnas de interes
     # conformacion de la columna con los valores target
     reg_df['Prediccion'] = 0
-    inicio = 4
-    for index, row in reg_df.iloc[inicio:].iterrows():
-        reg_df.at[index, 'Prediccion']= reg_df.at[index - 4, 'TEMP_INTERIORDHT11']
-    reg_df = reg_df.drop(reg_df.index[:4]) # borramos los ultimos 4 registros ya que valen 0 por no tener prediccion
+    
     regresion = R_lineal() #creamos un objeto de regrasion lineal
     ruta_modelo = 'C:/Users/Javier/Desktop/Streamlit_TUTORIAL/modelo_regresion_lineal.pkl'
     prediccion = regresion.predecir(df_ultimo,ruta_modelo)
@@ -231,7 +228,7 @@ with st.expander("Prediccion por regresion lineal"):
  
     
     #colE.text("Prediccion de la Temperatura \nInterior en una hora")
-    opcion_pred = ['Temperatura externa', 'Temperatura interna', 'Temperatura muro externa',
+    opcion_pred = ['---------------------','Temperatura externa', 'Temperatura interna', 'Temperatura muro externa',
                 'Temperatura muro interna', 'Humedad externa', 'Humedad interna']
     with colE:
         predice= st.selectbox(label='seleccione prediccion \na 60 minutos', options=opcion_pred)
@@ -265,19 +262,79 @@ with st.expander("Prediccion por regresion lineal"):
             elif predice == 'Humedad externa':
                 ruta_modelo='./reg_lineal_Hum_EXT.pkl'
                 prediccion= regresion.predecir(df_ultimo, ruta_modelo)
-                #colF.text('PREDICCION')
-                colF.text("{} °C".format(prediccion))
+                colF.text('PREDICCION')
+                colF.text("{} %".format(prediccion))
                 
             elif predice == 'Humedad interna':
                 ruta_modelo='./reg_lineal_Hum_INT.pkl'
                 prediccion= regresion.predecir(df_ultimo, ruta_modelo)
                 colF.text('PREDICCION')
-                colF.text("{} °C".format(prediccion))
+                colF.text("{} %".format(prediccion))
         
         
     # entrenamiento de modelos
-    
-    regresion.entrenar_y_guardar(reg_df,ruta_modelo)# entrenamos y guardamos el modelo
+with st.expander(label="Reentrenar modelo de regresion con datos actualizados"):
+    eleccion = st.selectbox("Seleccione el objetivo del modelo predictor", options=opcion_pred)
+    if eleccion:
+        if eleccion == 'Temperatura externa':
+            inicio = 4
+            ruta_modelo = './reg_lineal_temp_EXT.pkl'
+            n_reg_df = reg_df
+            for index, row in n_reg_df.iloc[inicio:].iterrows():
+                n_reg_df.at[index, 'Prediccion']= n_reg_df.at[index - 4, columna[eleccion]]
+            n_reg_df = n_reg_df.drop(reg_df.index[:4]) # borramos los ultimos 4 registros ya que valen 0 por no tener prediccion
+            regresion.entrenar_y_guardar(n_reg_df,ruta_modelo)# entrenamos y guardamos el modelo
+            st.info("Modelo actualizado correctamente")
+            
+        elif eleccion == 'Temperatura interna':
+            inicio = 4
+            ruta_modelo = './reg_lineal_temp_int.pkl'
+            n_reg_df = reg_df
+            for index, row in n_reg_df.iloc[inicio:].iterrows():
+                n_reg_df.at[index, 'Prediccion']= n_reg_df.at[index - 4, columna[eleccion]]
+            n_reg_df = n_reg_df.drop(reg_df.index[:4]) 
+            regresion.entrenar_y_guardar(n_reg_df,ruta_modelo)
+            st.info("Modelo actualizado correctamente")
+        
+        elif eleccion == 'Temperatura muro externa':
+            inicio = 4
+            ruta_modelo = './reg_lineal_Temp_Muro_EXT.pkl'
+            n_reg_df = reg_df
+            for index, row in n_reg_df.iloc[inicio:].iterrows():
+                n_reg_df.at[index, 'Prediccion']= n_reg_df.at[index - 4, columna[eleccion]]
+            n_reg_df = n_reg_df.drop(reg_df.index[:4]) 
+            regresion.entrenar_y_guardar(n_reg_df,ruta_modelo)
+            st.info("Modelo actualizado correctamente")
+        
+        elif eleccion == 'Temperatura muro interna':
+            inicio = 4
+            ruta_modelo = './reg_lineal_Temp_Muro_INT.pkl'
+            n_reg_df = reg_df
+            for index, row in n_reg_df.iloc[inicio:].iterrows():
+                n_reg_df.at[index, 'Prediccion']= n_reg_df.at[index - 4, columna[eleccion]]
+            n_reg_df = n_reg_df.drop(reg_df.index[:4]) 
+            regresion.entrenar_y_guardar(n_reg_df,ruta_modelo)
+            st.info("Modelo actualizado correctamente")
+        
+        elif eleccion == 'Humedad externa':
+            inicio = 4
+            ruta_modelo = './reg_lineal_Hum_EXT.pkl'
+            n_reg_df = reg_df
+            for index, row in n_reg_df.iloc[inicio:].iterrows():
+                n_reg_df.at[index, 'Prediccion']= n_reg_df.at[index - 4, columna[eleccion]]
+            n_reg_df = n_reg_df.drop(reg_df.index[:4]) 
+            regresion.entrenar_y_guardar(n_reg_df,ruta_modelo)
+            st.info("Modelo actualizado correctamente")
+        
+        elif eleccion == 'Humedad interna':
+            inicio = 4
+            ruta_modelo = './reg_lineal_Hum_INT.pkl'
+            n_reg_df = reg_df
+            for index, row in n_reg_df.iloc[inicio:].iterrows():
+                n_reg_df.at[index, 'Prediccion']= n_reg_df.at[index - 4, columna[eleccion]]
+            n_reg_df = n_reg_df.drop(reg_df.index[:4]) 
+            regresion.entrenar_y_guardar(n_reg_df,ruta_modelo)
+            st.success("Modelo actualizado correctamente")
     
 #endregion
 
