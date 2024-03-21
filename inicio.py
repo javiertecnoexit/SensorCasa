@@ -225,15 +225,60 @@ with st.expander("Prediccion por regresion lineal"):
     reg_df = reg_df.drop(reg_df.index[:4]) # borramos los ultimos 4 registros ya que valen 0 por no tener prediccion
     regresion = R_lineal() #creamos un objeto de regrasion lineal
     ruta_modelo = 'C:/Users/Javier/Desktop/Streamlit_TUTORIAL/modelo_regresion_lineal.pkl'
-    regresion.entrenar_y_guardar(reg_df,ruta_modelo)# entrenamos y guardamos el modelo
     prediccion = regresion.predecir(df_ultimo,ruta_modelo)
     colE,colF=st.columns(2)
     
  
     
-    colE.text("Prediccion de la Temperatura \nInterior en una hora")
-    colF.text("{} °C".format(prediccion))
+    #colE.text("Prediccion de la Temperatura \nInterior en una hora")
+    opcion_pred = ['Temperatura externa', 'Temperatura interna', 'Temperatura muro externa',
+                'Temperatura muro interna', 'Humedad externa', 'Humedad interna']
+    with colE:
+        predice= st.selectbox(label='seleccione prediccion \na 60 minutos', options=opcion_pred)
         
+    with colF:
+        if predice:
+            if predice == 'Temperatura externa':
+                ruta_modelo='./reg_lineal_temp_EXT.pkl'
+                prediccion= regresion.predecir(df_ultimo, ruta_modelo)
+                colF.text('PREDICCION')
+                colF.text("{} °C".format(prediccion))
+        
+            elif predice == 'Temperatura interna':
+                ruta_modelo='./reg_lineal_temp_int.pkl'
+                prediccion= regresion.predecir(df_ultimo, ruta_modelo)
+                colF.text('PREDICCION')
+                colF.text("{} °C".format(prediccion))
+                
+            elif predice == 'Temperatura muro externa':
+                ruta_modelo='./reg_lineal_Temp_Muro_EXT.pkl'
+                prediccion= regresion.predecir(df_ultimo, ruta_modelo)
+                colF.text('PREDICCION')
+                colF.text("{} °C".format(prediccion))
+                
+            elif predice == 'Temperatura muro interna':
+                ruta_modelo='./reg_lineal_Temp_Muro_INT.pkl'
+                prediccion= regresion.predecir(df_ultimo, ruta_modelo)
+                colF.text('PREDICCION')
+                colF.text("{} °C".format(prediccion))
+                
+            elif predice == 'Humedad externa':
+                ruta_modelo='./reg_lineal_Hum_EXT.pkl'
+                prediccion= regresion.predecir(df_ultimo, ruta_modelo)
+                #colF.text('PREDICCION')
+                colF.text("{} °C".format(prediccion))
+                
+            elif predice == 'Humedad interna':
+                ruta_modelo='./reg_lineal_Hum_INT.pkl'
+                prediccion= regresion.predecir(df_ultimo, ruta_modelo)
+                colF.text('PREDICCION')
+                colF.text("{} °C".format(prediccion))
+        
+        
+    # entrenamiento de modelos
+    
+    regresion.entrenar_y_guardar(reg_df,ruta_modelo)# entrenamos y guardamos el modelo
+    
 #endregion
 
 
