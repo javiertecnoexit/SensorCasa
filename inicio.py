@@ -275,8 +275,7 @@ with st.expander("Prediccion por regresion lineal"):
     reg_df['Prediccion'] = 0
     
     regresion = R_lineal() #creamos un objeto de regrasion lineal
-    ruta_modelo = 'C:/Users/Javier/Desktop/Streamlit_TUTORIAL/modelo_regresion_lineal.pkl'
-    prediccion = regresion.predecir(df_ultimo,ruta_modelo)
+    
     colE,colF=st.columns(2)
     
  
@@ -392,6 +391,199 @@ with st.expander(label="Reentrenar modelo de regresion con datos actualizados"):
     
 #endregion
 
+# region EVALUACION DEL MODELO POR CADA VARIABLE
+with st.expander(label="Evaluacion del modelo, comparativa del valor real y su prediccion"):
+    compara = st.selectbox(label="Elija la el parametro que desea evaluar", options=opcion_pred)
+    
+    
+    if compara:
+        if compara == 'Temperatura externa':
+            ponderar = pd.DataFrame(columns=['fecha','real','prediccion'])
+            lista= ['TEMP_INT','TEMP_EXT','HUM_INT','TEMP_INTERIORDHT11','HUMEDAD_EXT','TEMP_EXT_DHT11']
+            reg_df = df[lista]
+            rango = len(df)-4
+            ruta = './reg_lineal_temp_EXT.pkl'
+            for i in range(rango):
+                a=regresion.predecir(reg_df.iloc[i+4],ruta_modelo=ruta)
+                a = float(a[0])
+                
+                ponderar = ponderar.append({'fecha':df.iloc[i]['Timestamp'],'real':df.iloc[i]['TEMP_EXT_DHT11'],'prediccion':a}, ignore_index=True)
+            #--------------GRAFICAR EL DATAFRAME-------------------------
+            # Crear figura de Plotly
+            fig = go.Figure()
 
+            # Añadir líneas al gráfico
+            fig.add_trace(go.Scatter(x=ponderar['fecha'], y=ponderar['real'], mode='lines', name='real'))
+            fig.add_trace(go.Scatter(x=ponderar['fecha'], y=ponderar['prediccion'], mode='lines', name='prediccion'))
+                                    
+            # Configuración del diseño del gráfico
+            fig.update_layout(
+            title='Gráfico de Temperatura externa',
+            xaxis_title='Fecha',
+            yaxis_title='Grados centigrados',
+            template='plotly_white'
+            )
+        
+            # Mostrar el gráfico en Streamlit
+            st.plotly_chart(fig, use_container_width=True)
+            
+            
+                
+        elif compara == 'Temperatura interna':
+            ponderar = pd.DataFrame(columns=['fecha','real','prediccion'])
+            lista= ['TEMP_INT','TEMP_EXT','HUM_INT','TEMP_INTERIORDHT11','HUMEDAD_EXT','TEMP_EXT_DHT11']
+            reg_df = df[lista]
+            rango = len(df)-4
+            ruta = './reg_lineal_temp_int.pkl'
+            for i in range(rango):
+                a=regresion.predecir(reg_df.iloc[i+4],ruta_modelo=ruta)
+                a = float(a[0])
+                
+                ponderar = ponderar.append({'fecha':df.iloc[i]['Timestamp'],'real':df.iloc[i]['TEMP_INTERIORDHT11'],'prediccion':a}, ignore_index=True)
+            #--------------GRAFICAR EL DATAFRAME-------------------------
+            # Crear figura de Plotly
+            fig = go.Figure()
+
+            # Añadir líneas al gráfico
+            fig.add_trace(go.Scatter(x=ponderar['fecha'], y=ponderar['real'], mode='lines', name='real'))
+            fig.add_trace(go.Scatter(x=ponderar['fecha'], y=ponderar['prediccion'], mode='lines', name='prediccion'))
+                                    
+            # Configuración del diseño del gráfico
+            fig.update_layout(
+            title='Gráfico de Temperatura Interior',
+            xaxis_title='Fecha',
+            yaxis_title='Grados centigrados',
+            template='plotly_white'
+            )
+        
+            # Mostrar el gráfico en Streamlit
+            st.plotly_chart(fig, use_container_width=True)
+        elif compara == 'Temperatura muro externa':
+            ponderar = pd.DataFrame(columns=['fecha','real','prediccion'])
+            lista= ['TEMP_INT','TEMP_EXT','HUM_INT','TEMP_INTERIORDHT11','HUMEDAD_EXT','TEMP_EXT_DHT11']
+            reg_df = df[lista]
+            rango = len(df)-4
+            ruta = './reg_lineal_Temp_Muro_EXT.pkl'
+            for i in range(rango):
+                a=regresion.predecir(reg_df.iloc[i+4],ruta_modelo=ruta)
+                a = float(a[0])
+                
+                ponderar = ponderar.append({'fecha':df.iloc[i]['Timestamp'],'real':df.iloc[i]['TEMP_EXT'],'prediccion':a}, ignore_index=True)
+            #--------------GRAFICAR EL DATAFRAME-------------------------
+            # Crear figura de Plotly
+            fig = go.Figure()
+
+            # Añadir líneas al gráfico
+            fig.add_trace(go.Scatter(x=ponderar['fecha'], y=ponderar['real'], mode='lines', name='real'))
+            fig.add_trace(go.Scatter(x=ponderar['fecha'], y=ponderar['prediccion'], mode='lines', name='prediccion'))
+                                    
+            # Configuración del diseño del gráfico
+            fig.update_layout(
+            title='Gráfico de Temperatura de Muro cara Exterior',
+            xaxis_title='Fecha',
+            yaxis_title='Grados centigrados',
+            template='plotly_white'
+            )
+        
+            # Mostrar el gráfico en Streamlit
+            st.plotly_chart(fig, use_container_width=True)     
+            
+        elif compara == 'Temperatura muro interna':
+            ponderar = pd.DataFrame(columns=['fecha','real','prediccion'])
+            lista= ['TEMP_INT','TEMP_EXT','HUM_INT','TEMP_INTERIORDHT11','HUMEDAD_EXT','TEMP_EXT_DHT11']
+            reg_df = df[lista]
+            rango = len(df)-4
+            ruta = './reg_lineal_Temp_Muro_INT.pkl'
+            for i in range(rango):
+                a=regresion.predecir(reg_df.iloc[i+4],ruta_modelo=ruta)
+                a = float(a[0])
+                
+                ponderar = ponderar.append({'fecha':df.iloc[i]['Timestamp'],'real':df.iloc[i]['TEMP_INT'],'prediccion':a}, ignore_index=True)
+            #--------------GRAFICAR EL DATAFRAME-------------------------
+            # Crear figura de Plotly
+            fig = go.Figure()
+
+            # Añadir líneas al gráfico
+            fig.add_trace(go.Scatter(x=ponderar['fecha'], y=ponderar['real'], mode='lines', name='real'))
+            fig.add_trace(go.Scatter(x=ponderar['fecha'], y=ponderar['prediccion'], mode='lines', name='prediccion'))
+                                    
+            # Configuración del diseño del gráfico
+            fig.update_layout(
+            title='Gráfico de Temperatura de Muro cara Interior',
+            xaxis_title='Fecha',
+            yaxis_title='Grados centigrados',
+            template='plotly_white'
+            )
+        
+            # Mostrar el gráfico en Streamlit
+            st.plotly_chart(fig, use_container_width=True)    
+            
+        elif compara == 'Humedad externa':
+            ponderar = pd.DataFrame(columns=['fecha','real','prediccion'])
+            lista= ['TEMP_INT','TEMP_EXT','HUM_INT','TEMP_INTERIORDHT11','HUMEDAD_EXT','TEMP_EXT_DHT11']
+            reg_df = df[lista]
+            rango = len(df)-4
+            ruta = './reg_lineal_Hum_EXT.pkl'
+            for i in range(rango):
+                a=regresion.predecir(reg_df.iloc[i+4],ruta_modelo=ruta)
+                a = float(a[0])
+                
+                ponderar = ponderar.append({'fecha':df.iloc[i]['Timestamp'],'real':df.iloc[i]['HUMEDAD_EXT'],'prediccion':a}, ignore_index=True)
+            #--------------GRAFICAR EL DATAFRAME-------------------------
+            # Crear figura de Plotly
+            fig = go.Figure()
+
+            # Añadir líneas al gráfico
+            fig.add_trace(go.Scatter(x=ponderar['fecha'], y=ponderar['real'], mode='lines', name='real'))
+            fig.add_trace(go.Scatter(x=ponderar['fecha'], y=ponderar['prediccion'], mode='lines', name='prediccion'))
+                                    
+            # Configuración del diseño del gráfico
+            fig.update_layout(
+            title='Gráfico de Humedad Exterior',
+            xaxis_title='Fecha',
+            yaxis_title='Porcentaje',
+            template='plotly_white'
+            )
+        
+            # Mostrar el gráfico en Streamlit
+            st.plotly_chart(fig, use_container_width=True)
+            
+        elif compara == 'Humedad interna':
+            ponderar = pd.DataFrame(columns=['fecha','real','prediccion'])
+            lista= ['TEMP_INT','TEMP_EXT','HUM_INT','TEMP_INTERIORDHT11','HUMEDAD_EXT','TEMP_EXT_DHT11']
+            reg_df = df[lista]
+            rango = len(df)-4
+            ruta = './reg_lineal_Hum_INT.pkl'
+            for i in range(rango):
+                a=regresion.predecir(reg_df.iloc[i+4],ruta_modelo=ruta)
+                a = float(a[0])
+                
+                ponderar = ponderar.append({'fecha':df.iloc[i]['Timestamp'],'real':df.iloc[i]['HUM_INT'],'prediccion':a}, ignore_index=True)
+            #--------------GRAFICAR EL DATAFRAME-------------------------
+            # Crear figura de Plotly
+            fig = go.Figure()
+
+            # Añadir líneas al gráfico
+            fig.add_trace(go.Scatter(x=ponderar['fecha'], y=ponderar['real'], mode='lines', name='real'))
+            fig.add_trace(go.Scatter(x=ponderar['fecha'], y=ponderar['prediccion'], mode='lines', name='prediccion'))
+                                    
+            # Configuración del diseño del gráfico
+            fig.update_layout(
+            title='Gráfico de Humedad Interior',
+            xaxis_title='Fecha',
+            yaxis_title='Porcentaje',
+            template='plotly_white'
+            )
+        
+            # Mostrar el gráfico en Streamlit
+            st.plotly_chart(fig, use_container_width=True)
+    
+    
+    
+    
+    
+    
+# endregion   
+    
 st.subheader("Dataset original")
 st.dataframe(df)
