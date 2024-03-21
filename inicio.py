@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 from graficos import Grafico
 from modelos import *
 from scrap_web import Scrapero
-
+import plotly.graph_objects as go
 # region conexion a la base de datos (DESCONECTADA POR AHORA)
 ########### conectar con la base de datos########################
 
@@ -164,6 +164,60 @@ with st.expander('Visualice el grafico 1 seleccionado en el menú de la izquierd
                 st.subheader(f"Grafica {opcion}")
                 st.text(f'ha elegido la variable {var_2}')
                 st.pyplot(grafico.grafico_de_linea(df['Timestamp'],df[columna[var_2]],'Fecha',var_2,var_2))
+
+# region GRAFICO DE LINEAS SUPERPUESTAS
+
+with st.expander(" Grafico de lineas superpuestas"):
+    col_a, col_b = st.columns(2)
+    with col_a:
+        df_l = df[['TEMP_INT','TEMP_EXT','TEMP_INTERIORDHT11','TEMP_EXT_DHT11','Timestamp']]
+
+        # Crear figura de Plotly
+        fig = go.Figure()
+
+        # Añadir líneas al gráfico
+        fig.add_trace(go.Scatter(x=df['Timestamp'], y=df['TEMP_INT'], mode='lines', name='Temp Muro Int'))
+        fig.add_trace(go.Scatter(x=df['Timestamp'], y=df['TEMP_INTERIORDHT11'], mode='lines', name='Temp Int'))
+        fig.add_trace(go.Scatter(x=df['Timestamp'], y=df['TEMP_EXT'], mode='lines', name='Temp Muro Ext'))
+        
+        fig.add_trace(go.Scatter(x=df['Timestamp'], y=df['TEMP_EXT_DHT11'], mode='lines', name='Temp Ext'))
+        
+        
+        # Configuración del diseño del gráfico
+        fig.update_layout(
+        title='Gráfico de Temperaturas',
+        xaxis_title='Fecha',
+        yaxis_title='Grados centigrados',
+        template='plotly_white'
+        )
+    
+        # Mostrar el gráfico en Streamlit
+        st.plotly_chart(fig, use_container_width=True)
+
+        with col_b:
+            # Crear figura de Plotly
+            fig = go.Figure()
+
+            # Añadir líneas al gráfico
+            fig.add_trace(go.Scatter(x=df['Timestamp'], y=df['HUM_INT'], mode='lines', name='Humedad Int'))
+            fig.add_trace(go.Scatter(x=df['Timestamp'], y=df['HUMEDAD_EXT'], mode='lines', name='Humedad Ext'))
+            
+            
+            
+            # Configuración del diseño del gráfico
+            fig.update_layout(
+            title='Gráfico de Humedad relativa',
+            xaxis_title='Fecha',
+            yaxis_title='Porcentaje',
+            template='plotly_white'
+            )
+        
+            # Mostrar el gráfico en Streamlit
+            st.plotly_chart(fig, use_container_width=True)
+
+# endregion
+
+
 
 # region grafico de dispersion            
 with st.expander("Grafico 2 Dispersion"):
