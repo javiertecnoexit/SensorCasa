@@ -37,16 +37,15 @@ import plotly.graph_objects as go
 # region SCRAP de datos (POR AHORA ACTIVO)
 ##########################################################################
 scrap = Scrapero()
-path = 'https://www.proyectociudad.com.ar/esp-data.php'
+path = 'https://www.delsuranalitica.online/esp-data.php'
 # columnas de la tabla 
-# ['ID', 'Sensor', 'Location', 'TEMP_INT', 'TEMP_EXT', 'HUM_INT',
-#       'TEMP_INTERIORDHT11', 'HUMEDAD_EXT', 'TEMP_EXT_DHT11', 'BOTON_INT',
-#      'BOTON_EXT', 'Timestamp']
+# ['ID', 'Sonda', 'fecha', 'Conductividad', 'TEMP_agua', 'TEMP_aire',
+#       'HUM_AIRE', 'ALTURA', 'OBS_1', 'OBS_2']
 data = scrap.scrapear(url=path)
 df = data
-df['Timestamp']=pd.to_datetime(df['Timestamp'])
+df['fecha']=pd.to_datetime(df['fecha'])
 # Convertir las columnas a tipo float
-columnas = ['TEMP_INT', 'TEMP_EXT', 'HUM_INT', 'HUMEDAD_EXT','TEMP_INTERIORDHT11','TEMP_EXT_DHT11']
+columnas = ['Conductividad', 'TEMP_agua', 'TEMP_aire','HUM_AIRE','ALTURA']
 df[columnas] = df[columnas].apply(pd.to_numeric, errors='coerce')
 
 print(df.columns)
@@ -54,15 +53,11 @@ print(df.columns)
 # endregion
 
 # region caracteristicas de menu
-caracteristicas= ['Temperatura externa', 'Temperatura interna', 'Temperatura muro externa',
-                'Temperatura muro interna', 'Humedad externa', 'Humedad interna',
-                'Ventana abierta', 'Aire acondicionado encendido']
+caracteristicas= ['Conductividad', 'Temperatura agua', 'Temperatura aire',
+                'Humedad aire', 'Altura']
 
-columna= {'Temperatura externa':'TEMP_EXT_DHT11', 'Temperatura interna':'TEMP_INTERIORDHT11', 
-            'Temperatura muro externa':'TEMP_EXT',
-                'Temperatura muro interna':'TEMP_INT', 'Humedad externa':'HUMEDAD_EXT',
-                'Humedad interna':'HUM_INT', 'Ventana abierta':'BOTON_EXT', 
-                'Aire acondicionado encendido':'BOTON_EXT'}
+columna= {'Conductividad':'Conductividad', 'Temperatura agua':'TEMP_agua', 
+            'Temperatura aire':'TEMP_aire', 'Humedad aire':'HUM_AIRE','Altura':'ALTURA'}
 # endregion
 with st.sidebar:
     # region de seleccion de periodo de estudio
@@ -131,10 +126,9 @@ with st.expander("Estadisticas basicas"):
     # por el usuario
     ndf= df 
     cabecera= {
-        'TEMP_INT':'Temp. muro interior', 'TEMP_EXT':'Temp. muro exterior',
-        'HUM_INT':'Humedad interior', 'TEMP_INTERIORDHT11':'Temp. interior',
-        'HUMEDAD_EXT':'Humedad exterior', 'TEMP_EXT_DHT11':'Temp. exterior'
-    }
+        'Conductividad':'Conductividad %', 'TEMP_agua':'Tempetatura agua',
+        'TEMP_aire':'Temperatura aire', 'HUM_AIRE':'Humedad aire',
+        'ALTURA':'Altura'}
     ndf = ndf.rename(columns=cabecera)
     ndf = grafico.descripcion(ndf)
     
@@ -157,64 +151,98 @@ with st.expander('Visualice el grafico 1 seleccionado en el menú de la izquierd
         with col1:
                 st.subheader(f"Grafica {opcion}")
                 st.text(f'ha elegido la variable {var_1}')
-                st.pyplot(grafico.grafico_de_linea(df['Timestamp'],df[columna[var_1]],'Fecha',var_1,var_1))
+                st.pyplot(grafico.grafico_de_linea(df['fecha'],df[columna[var_1]],'Fecha',var_1,var_1))
                 
             
         with col2:
                 st.subheader(f"Grafica {opcion}")
                 st.text(f'ha elegido la variable {var_2}')
-                st.pyplot(grafico.grafico_de_linea(df['Timestamp'],df[columna[var_2]],'Fecha',var_2,var_2))
+                st.pyplot(grafico.grafico_de_linea(df['fecha'],df[columna[var_2]],'Fecha',var_2,var_2))
 
 # region GRAFICO DE LINEAS SUPERPUESTAS
 
 with st.expander(" Grafico de lineas superpuestas"):
-    col_a, col_b = st.columns(2)
-    with col_a:
-        df_l = df[['TEMP_INT','TEMP_EXT','TEMP_INTERIORDHT11','TEMP_EXT_DHT11','Timestamp']]
-
-        # Crear figura de Plotly
-        fig = go.Figure()
-
-        # Añadir líneas al gráfico
-        fig.add_trace(go.Scatter(x=df['Timestamp'], y=df['TEMP_INT'], mode='lines', name='Temp Muro Int'))
-        fig.add_trace(go.Scatter(x=df['Timestamp'], y=df['TEMP_INTERIORDHT11'], mode='lines', name='Temp Int'))
-        fig.add_trace(go.Scatter(x=df['Timestamp'], y=df['TEMP_EXT'], mode='lines', name='Temp Muro Ext'))
-        
-        fig.add_trace(go.Scatter(x=df['Timestamp'], y=df['TEMP_EXT_DHT11'], mode='lines', name='Temp Ext'))
-        
-        
-        # Configuración del diseño del gráfico
-        fig.update_layout(
-        title='Gráfico de Temperaturas',
-        xaxis_title='Fecha',
-        yaxis_title='Grados centigrados',
-        template='plotly_white'
-        )
     
-        # Mostrar el gráfico en Streamlit
-        st.plotly_chart(fig, use_container_width=True)
+    df_l = df[['fecha','Conductividad','TEMP_agua','TEMP_aire','HUM_AIRE','ALTURA']]
 
-        with col_b:
-            # Crear figura de Plotly
-            fig = go.Figure()
-
-            # Añadir líneas al gráfico
-            fig.add_trace(go.Scatter(x=df['Timestamp'], y=df['HUM_INT'], mode='lines', name='Humedad Int'))
-            fig.add_trace(go.Scatter(x=df['Timestamp'], y=df['HUMEDAD_EXT'], mode='lines', name='Humedad Ext'))
-            
-            
-            
-            # Configuración del diseño del gráfico
-            fig.update_layout(
-            title='Gráfico de Humedad relativa',
-            xaxis_title='Fecha',
-            yaxis_title='Porcentaje',
-            template='plotly_white'
-            )
+    # Crear figura de Plotly
+    fig = go.Figure()
+    # Añadir líneas al gráfico
+    fig.add_trace(go.Scatter(x=df['fecha'], y=df['Conductividad'], mode='lines', name='Conductividad'))
+    # Configuración del diseño del gráfico
+    fig.update_layout(
+    title='Conductividad',
+    xaxis_title='Fecha',
+    yaxis_title='Porcentaje de conduccion',
+    template='plotly_white'
+    )
+    
+    # Mostrar el gráfico en Streamlit
+    st.plotly_chart(fig, use_container_width=True)
         
-            # Mostrar el gráfico en Streamlit
-            st.plotly_chart(fig, use_container_width=True)
-
+    #-------------temperatura del agua---------------------
+    # Crear figura de Plotly
+    fig = go.Figure()
+    # Añadir líneas al gráfico
+    fig.add_trace(go.Scatter(x=df['fecha'], y=df['TEMP_agua'], mode='lines', name='Temp. agua'))
+    # Configuración del diseño del gráfico
+    fig.update_layout(
+    title='Temperatura del agua',
+    xaxis_title='Fecha',
+    yaxis_title='Grados centigrados',
+    template='plotly_white'
+    )
+    
+    # Mostrar el gráfico en Streamlit
+    st.plotly_chart(fig, use_container_width=True)
+    
+    #-------------altura del arroyo---------------------
+    # Crear figura de Plotly
+    fig = go.Figure()
+    # Añadir líneas al gráfico
+    fig.add_trace(go.Scatter(x=df['fecha'], y=df['ALTURA'], mode='lines', name='Altura'))
+    # Configuración del diseño del gráfico
+    fig.update_layout(
+    title='Altura del arroyo',
+    xaxis_title='Fecha',
+    yaxis_title='Centimetros',
+    template='plotly_white'
+    )
+    
+    # Mostrar el gráfico en Streamlit
+    st.plotly_chart(fig, use_container_width=True)
+    
+    #-------------temperatura del aire sobre el arroyo---------------------
+    # Crear figura de Plotly
+    fig = go.Figure()
+    # Añadir líneas al gráfico
+    fig.add_trace(go.Scatter(x=df['fecha'], y=df['TEMP_aire'], mode='lines', name='Temp. aire'))
+    # Configuración del diseño del gráfico
+    fig.update_layout(
+    title='Temperatura del aire',
+    xaxis_title='Fecha',
+    yaxis_title='Grados centigrados',
+    template='plotly_white'
+    )
+    
+    # Mostrar el gráfico en Streamlit
+    st.plotly_chart(fig, use_container_width=True)
+    
+    #-------------humedad relativa del aire---------------------
+    # Crear figura de Plotly
+    fig = go.Figure()
+    # Añadir líneas al gráfico
+    fig.add_trace(go.Scatter(x=df['fecha'], y=df['HUM_AIRE'], mode='lines', name='Humedad aire'))
+    # Configuración del diseño del gráfico
+    fig.update_layout(
+    title='Humedad relativa del aire',
+    xaxis_title='Fecha',
+    yaxis_title='Porcentaje de humedad',
+    template='plotly_white'
+    )
+    
+    # Mostrar el gráfico en Streamlit
+    st.plotly_chart(fig, use_container_width=True)
 # endregion
 
 
@@ -254,21 +282,21 @@ with st.expander(label='Grafico 3 Analisis de PCA y Cluster DBSCAN'):
 #region REGRESION LINEAL
 with st.expander("Prediccion por regresion lineal"):
     df_ultimo = df.iloc[0]
-    st.markdown("Parametros actuales (ultima medicion) {}".format(df_ultimo['Timestamp']))
+    st.markdown("Parametros actuales (ultima medicion) {}".format(df_ultimo['fecha']))
     
     colA,colB,colC = st.columns(3)
     with colA:
-        st.text("Temperatura \nExterior : {} °C".format(df_ultimo['TEMP_EXT_DHT11']))
-        st.text("Temperatura \nInterior : {} °C".format(df_ultimo['TEMP_INTERIORDHT11']))
+        st.text("Temperatura \nAgua : {} °C".format(df_ultimo['TEMP_agua']))
+        st.text("Conductividad \nAgua : {} °C".format(df_ultimo['Conductividad']))
     with colB:
-        st.text("Humedad \nExterior : {} °C".format(df_ultimo['HUMEDAD_EXT']))
-        st.text("Humedad \nInterior : {} °C".format(df_ultimo['HUM_INT']))
+        st.text("Altura \nArroyo : {} °C".format(df_ultimo['ALTURA']))
+        
     with colC:
-        st.text("Temp. Muro \nExterior : {} °C".format(df_ultimo['TEMP_EXT']))
-        st.text("Temp. Muro \nInterior : {} °C".format(df_ultimo['TEMP_INT']))
+        st.text("Temperatura \nAire : {} °C".format(df_ultimo['TEMP_aire']))
+        st.text("Humedad \nAire : {} °C".format(df_ultimo['HUM_AIRE']))
 
     # conformacion del dataset para el entrenamiento
-    lista= ['TEMP_INT','TEMP_EXT','HUM_INT','TEMP_INTERIORDHT11','HUMEDAD_EXT','TEMP_EXT_DHT11']
+    lista= ['Conductividad','TEMP_agua','TEMP_aire','HUM_AIRE','ALTURA']
     reg_df = df[lista]
     df_ultimo = df_ultimo[lista] # del ultimo registro solo guardamos las columnas de interes
     # conformacion de la columna con los valores target
@@ -281,57 +309,55 @@ with st.expander("Prediccion por regresion lineal"):
  
     
     #colE.text("Prediccion de la Temperatura \nInterior en una hora")
-    opcion_pred = ['---------------------','Temperatura externa', 'Temperatura interna', 'Temperatura muro externa',
-                'Temperatura muro interna', 'Humedad externa', 'Humedad interna']
+    opcion_pred = ['---------------------','Conductividad', 'Temperatura agua', 'Temperatura aire',
+                'Humedad aire', 'Altura']
     with colE:
         predice= st.selectbox(label='seleccione prediccion \na 60 minutos', options=opcion_pred)
         
     with colF:
         if predice:
-            if predice == 'Temperatura externa':
-                ruta_modelo='./reg_lineal_temp_EXT.pkl'
+            if predice == 'Conductividad':
+                ruta_modelo='./reg_lineal_Conductividad.pkl'
                 prediccion= regresion.predecir(df_ultimo, ruta_modelo)
                 colF.text('PREDICCION')
                 colF.text("{} °C".format(prediccion))
         
-            elif predice == 'Temperatura interna':
-                ruta_modelo='./reg_lineal_temp_int.pkl'
+            elif predice == 'Temperatura agua':
+                ruta_modelo='./reg_lineal_temp_agua.pkl'
                 prediccion= regresion.predecir(df_ultimo, ruta_modelo)
                 colF.text('PREDICCION')
                 colF.text("{} °C".format(prediccion))
                 
-            elif predice == 'Temperatura muro externa':
-                ruta_modelo='./reg_lineal_Temp_Muro_EXT.pkl'
+            elif predice == 'Temperatura aire':
+                ruta_modelo='./reg_lineal_Temp_aire.pkl'
                 prediccion= regresion.predecir(df_ultimo, ruta_modelo)
                 colF.text('PREDICCION')
                 colF.text("{} °C".format(prediccion))
                 
-            elif predice == 'Temperatura muro interna':
-                ruta_modelo='./reg_lineal_Temp_Muro_INT.pkl'
+            elif predice == 'Humedad aire':
+                ruta_modelo='./reg_lineal_Hum_aire.pkl'
                 prediccion= regresion.predecir(df_ultimo, ruta_modelo)
                 colF.text('PREDICCION')
                 colF.text("{} °C".format(prediccion))
                 
-            elif predice == 'Humedad externa':
-                ruta_modelo='./reg_lineal_Hum_EXT.pkl'
+            elif predice == 'Altura':
+                ruta_modelo='./reg_lineal_Altura.pkl'
                 prediccion= regresion.predecir(df_ultimo, ruta_modelo)
                 colF.text('PREDICCION')
                 colF.text("{} %".format(prediccion))
                 
-            elif predice == 'Humedad interna':
-                ruta_modelo='./reg_lineal_Hum_INT.pkl'
-                prediccion= regresion.predecir(df_ultimo, ruta_modelo)
-                colF.text('PREDICCION')
-                colF.text("{} %".format(prediccion))
+
         
         
     # entrenamiento de modelos
+    #opcion_pred = ['---------------------','Conductividad', 'Temperatura agua', 'Temperatura aire',
+    #            'Humedad aire', 'Altura']
 with st.expander(label="Reentrenar modelo de regresion con datos actualizados"):
     eleccion = st.selectbox("Seleccione el objetivo del modelo predictor", options=opcion_pred)
     if eleccion:
-        if eleccion == 'Temperatura externa':
+        if eleccion == 'Conductividad':
             inicio = 4
-            ruta_modelo = './reg_lineal_temp_EXT.pkl'
+            ruta_modelo = './reg_lineal_Conductividad.pkl'
             n_reg_df = reg_df
             for index, row in n_reg_df.iloc[inicio:].iterrows():
                 n_reg_df.at[index, 'Prediccion']= n_reg_df.at[index - 4, columna[eleccion]]
@@ -339,9 +365,9 @@ with st.expander(label="Reentrenar modelo de regresion con datos actualizados"):
             regresion.entrenar_y_guardar(n_reg_df,ruta_modelo)# entrenamos y guardamos el modelo
             st.info("Modelo actualizado correctamente")
             
-        elif eleccion == 'Temperatura interna':
+        elif eleccion == 'Temperatura agua':
             inicio = 4
-            ruta_modelo = './reg_lineal_temp_int.pkl'
+            ruta_modelo = './reg_lineal_temp_agua.pkl'
             n_reg_df = reg_df
             for index, row in n_reg_df.iloc[inicio:].iterrows():
                 n_reg_df.at[index, 'Prediccion']= n_reg_df.at[index - 4, columna[eleccion]]
@@ -349,9 +375,9 @@ with st.expander(label="Reentrenar modelo de regresion con datos actualizados"):
             regresion.entrenar_y_guardar(n_reg_df,ruta_modelo)
             st.info("Modelo actualizado correctamente")
         
-        elif eleccion == 'Temperatura muro externa':
+        elif eleccion == 'Temperatura aire':
             inicio = 4
-            ruta_modelo = './reg_lineal_Temp_Muro_EXT.pkl'
+            ruta_modelo = './reg_lineal_Temp_aire.pkl'
             n_reg_df = reg_df
             for index, row in n_reg_df.iloc[inicio:].iterrows():
                 n_reg_df.at[index, 'Prediccion']= n_reg_df.at[index - 4, columna[eleccion]]
@@ -359,9 +385,9 @@ with st.expander(label="Reentrenar modelo de regresion con datos actualizados"):
             regresion.entrenar_y_guardar(n_reg_df,ruta_modelo)
             st.info("Modelo actualizado correctamente")
         
-        elif eleccion == 'Temperatura muro interna':
+        elif eleccion == 'Humedad aire':
             inicio = 4
-            ruta_modelo = './reg_lineal_Temp_Muro_INT.pkl'
+            ruta_modelo = './reg_lineal_Hum_aire.pkl'
             n_reg_df = reg_df
             for index, row in n_reg_df.iloc[inicio:].iterrows():
                 n_reg_df.at[index, 'Prediccion']= n_reg_df.at[index - 4, columna[eleccion]]
@@ -369,9 +395,9 @@ with st.expander(label="Reentrenar modelo de regresion con datos actualizados"):
             regresion.entrenar_y_guardar(n_reg_df,ruta_modelo)
             st.info("Modelo actualizado correctamente")
         
-        elif eleccion == 'Humedad externa':
+        elif eleccion == 'Altura':
             inicio = 4
-            ruta_modelo = './reg_lineal_Hum_EXT.pkl'
+            ruta_modelo = './reg_lineal_Altura.pkl'
             n_reg_df = reg_df
             for index, row in n_reg_df.iloc[inicio:].iterrows():
                 n_reg_df.at[index, 'Prediccion']= n_reg_df.at[index - 4, columna[eleccion]]
@@ -379,35 +405,28 @@ with st.expander(label="Reentrenar modelo de regresion con datos actualizados"):
             regresion.entrenar_y_guardar(n_reg_df,ruta_modelo)
             st.info("Modelo actualizado correctamente")
         
-        elif eleccion == 'Humedad interna':
-            inicio = 4
-            ruta_modelo = './reg_lineal_Hum_INT.pkl'
-            n_reg_df = reg_df
-            for index, row in n_reg_df.iloc[inicio:].iterrows():
-                n_reg_df.at[index, 'Prediccion']= n_reg_df.at[index - 4, columna[eleccion]]
-            n_reg_df = n_reg_df.drop(reg_df.index[:4]) 
-            regresion.entrenar_y_guardar(n_reg_df,ruta_modelo)
-            st.success("Modelo actualizado correctamente")
+        
     
 #endregion
 
 # region EVALUACION DEL MODELO POR CADA VARIABLE
 with st.expander(label="Evaluacion del modelo, comparativa del valor real y su prediccion"):
     compara = st.selectbox(label="Elija la el parametro que desea evaluar", options=opcion_pred)
-    
+    #opcion_pred = ['---------------------','Conductividad', 'Temperatura agua', 'Temperatura aire',
+    #            'Humedad aire', 'Altura']
     
     if compara:
-        if compara == 'Temperatura externa':
+        if compara == 'Conductividad':
             ponderar = pd.DataFrame(columns=['fecha','real','prediccion'])
-            lista= ['TEMP_INT','TEMP_EXT','HUM_INT','TEMP_INTERIORDHT11','HUMEDAD_EXT','TEMP_EXT_DHT11']
+            lista= ['Conductividad','TEMP_agua','TEMP_aire','HUM_AIRE','ALTURA']
             reg_df = df[lista]
             rango = len(df)-4
-            ruta = './reg_lineal_temp_EXT.pkl'
+            ruta = './reg_lineal_Conductividad.pkl'
             for i in range(rango):
                 a=regresion.predecir(reg_df.iloc[i+4],ruta_modelo=ruta)
                 a = float(a[0])
                 
-                ponderar = ponderar.append({'fecha':df.iloc[i]['Timestamp'],'real':df.iloc[i]['TEMP_EXT_DHT11'],'prediccion':a}, ignore_index=True)
+                ponderar = ponderar.append({'fecha':df.iloc[i]['fecha'],'real':df.iloc[i]['Conductividad'],'prediccion':a}, ignore_index=True)
             #--------------GRAFICAR EL DATAFRAME-------------------------
             # Crear figura de Plotly
             fig = go.Figure()
@@ -418,9 +437,9 @@ with st.expander(label="Evaluacion del modelo, comparativa del valor real y su p
                                     
             # Configuración del diseño del gráfico
             fig.update_layout(
-            title='Gráfico de Temperatura externa',
+            title='Gráfico de conductividad',
             xaxis_title='Fecha',
-            yaxis_title='Grados centigrados',
+            yaxis_title='Porcentaje de conductividad',
             template='plotly_white'
             )
         
@@ -429,17 +448,17 @@ with st.expander(label="Evaluacion del modelo, comparativa del valor real y su p
             
             
                 
-        elif compara == 'Temperatura interna':
+        elif compara == 'Temperatura agua':
             ponderar = pd.DataFrame(columns=['fecha','real','prediccion'])
-            lista= ['TEMP_INT','TEMP_EXT','HUM_INT','TEMP_INTERIORDHT11','HUMEDAD_EXT','TEMP_EXT_DHT11']
+            lista= ['Conductividad','TEMP_agua','TEMP_aire','HUM_AIRE','ALTURA']
             reg_df = df[lista]
             rango = len(df)-4
-            ruta = './reg_lineal_temp_int.pkl'
+            ruta = './reg_lineal_temp_agua.pkl'
             for i in range(rango):
                 a=regresion.predecir(reg_df.iloc[i+4],ruta_modelo=ruta)
                 a = float(a[0])
                 
-                ponderar = ponderar.append({'fecha':df.iloc[i]['Timestamp'],'real':df.iloc[i]['TEMP_INTERIORDHT11'],'prediccion':a}, ignore_index=True)
+                ponderar = ponderar.append({'fecha':df.iloc[i]['fecha'],'real':df.iloc[i]['TEMP_agua'],'prediccion':a}, ignore_index=True)
             #--------------GRAFICAR EL DATAFRAME-------------------------
             # Crear figura de Plotly
             fig = go.Figure()
@@ -450,7 +469,7 @@ with st.expander(label="Evaluacion del modelo, comparativa del valor real y su p
                                     
             # Configuración del diseño del gráfico
             fig.update_layout(
-            title='Gráfico de Temperatura Interior',
+            title='Gráfico de temperatura de agua',
             xaxis_title='Fecha',
             yaxis_title='Grados centigrados',
             template='plotly_white'
@@ -458,17 +477,17 @@ with st.expander(label="Evaluacion del modelo, comparativa del valor real y su p
         
             # Mostrar el gráfico en Streamlit
             st.plotly_chart(fig, use_container_width=True)
-        elif compara == 'Temperatura muro externa':
+        elif compara == 'Temperatura aire':
             ponderar = pd.DataFrame(columns=['fecha','real','prediccion'])
-            lista= ['TEMP_INT','TEMP_EXT','HUM_INT','TEMP_INTERIORDHT11','HUMEDAD_EXT','TEMP_EXT_DHT11']
+            lista= ['Conductividad','TEMP_agua','TEMP_aire','HUM_AIRE','ALTURA']
             reg_df = df[lista]
             rango = len(df)-4
-            ruta = './reg_lineal_Temp_Muro_EXT.pkl'
+            ruta = './reg_lineal_Temp_aire.pkl'
             for i in range(rango):
                 a=regresion.predecir(reg_df.iloc[i+4],ruta_modelo=ruta)
                 a = float(a[0])
                 
-                ponderar = ponderar.append({'fecha':df.iloc[i]['Timestamp'],'real':df.iloc[i]['TEMP_EXT'],'prediccion':a}, ignore_index=True)
+                ponderar = ponderar.append({'fecha':df.iloc[i]['fecha'],'real':df.iloc[i]['TEMP_aire'],'prediccion':a}, ignore_index=True)
             #--------------GRAFICAR EL DATAFRAME-------------------------
             # Crear figura de Plotly
             fig = go.Figure()
@@ -479,7 +498,7 @@ with st.expander(label="Evaluacion del modelo, comparativa del valor real y su p
                                     
             # Configuración del diseño del gráfico
             fig.update_layout(
-            title='Gráfico de Temperatura de Muro cara Exterior',
+            title='Gráfico de Temperatura de aire',
             xaxis_title='Fecha',
             yaxis_title='Grados centigrados',
             template='plotly_white'
@@ -488,17 +507,17 @@ with st.expander(label="Evaluacion del modelo, comparativa del valor real y su p
             # Mostrar el gráfico en Streamlit
             st.plotly_chart(fig, use_container_width=True)     
             
-        elif compara == 'Temperatura muro interna':
+        elif compara == 'Humedad aire':
             ponderar = pd.DataFrame(columns=['fecha','real','prediccion'])
-            lista= ['TEMP_INT','TEMP_EXT','HUM_INT','TEMP_INTERIORDHT11','HUMEDAD_EXT','TEMP_EXT_DHT11']
+            lista= ['Conductividad','TEMP_agua','TEMP_aire','HUM_AIRE','ALTURA']
             reg_df = df[lista]
             rango = len(df)-4
-            ruta = './reg_lineal_Temp_Muro_INT.pkl'
+            ruta = './reg_lineal_Hum_aire.pkl'
             for i in range(rango):
                 a=regresion.predecir(reg_df.iloc[i+4],ruta_modelo=ruta)
                 a = float(a[0])
                 
-                ponderar = ponderar.append({'fecha':df.iloc[i]['Timestamp'],'real':df.iloc[i]['TEMP_INT'],'prediccion':a}, ignore_index=True)
+                ponderar = ponderar.append({'fecha':df.iloc[i]['fecha'],'real':df.iloc[i]['HUM_AIRE'],'prediccion':a}, ignore_index=True)
             #--------------GRAFICAR EL DATAFRAME-------------------------
             # Crear figura de Plotly
             fig = go.Figure()
@@ -509,26 +528,26 @@ with st.expander(label="Evaluacion del modelo, comparativa del valor real y su p
                                     
             # Configuración del diseño del gráfico
             fig.update_layout(
-            title='Gráfico de Temperatura de Muro cara Interior',
+            title='Gráfico de Humedad de aire',
             xaxis_title='Fecha',
-            yaxis_title='Grados centigrados',
+            yaxis_title='Porcentaje de humedad',
             template='plotly_white'
             )
         
             # Mostrar el gráfico en Streamlit
             st.plotly_chart(fig, use_container_width=True)    
             
-        elif compara == 'Humedad externa':
+        elif compara == 'Altura':
             ponderar = pd.DataFrame(columns=['fecha','real','prediccion'])
-            lista= ['TEMP_INT','TEMP_EXT','HUM_INT','TEMP_INTERIORDHT11','HUMEDAD_EXT','TEMP_EXT_DHT11']
+            lista= ['Conductividad','TEMP_agua','TEMP_aire','HUM_AIRE','ALTURA']
             reg_df = df[lista]
             rango = len(df)-4
-            ruta = './reg_lineal_Hum_EXT.pkl'
+            ruta = './reg_lineal_Altura.pkl'
             for i in range(rango):
                 a=regresion.predecir(reg_df.iloc[i+4],ruta_modelo=ruta)
                 a = float(a[0])
                 
-                ponderar = ponderar.append({'fecha':df.iloc[i]['Timestamp'],'real':df.iloc[i]['HUMEDAD_EXT'],'prediccion':a}, ignore_index=True)
+                ponderar = ponderar.append({'fecha':df.iloc[i]['fecha'],'real':df.iloc[i]['ALTURA'],'prediccion':a}, ignore_index=True)
             #--------------GRAFICAR EL DATAFRAME-------------------------
             # Crear figura de Plotly
             fig = go.Figure()
@@ -539,44 +558,16 @@ with st.expander(label="Evaluacion del modelo, comparativa del valor real y su p
                                     
             # Configuración del diseño del gráfico
             fig.update_layout(
-            title='Gráfico de Humedad Exterior',
+            title='Gráfico de Altura',
             xaxis_title='Fecha',
-            yaxis_title='Porcentaje',
+            yaxis_title='Centimetros',
             template='plotly_white'
             )
         
             # Mostrar el gráfico en Streamlit
             st.plotly_chart(fig, use_container_width=True)
             
-        elif compara == 'Humedad interna':
-            ponderar = pd.DataFrame(columns=['fecha','real','prediccion'])
-            lista= ['TEMP_INT','TEMP_EXT','HUM_INT','TEMP_INTERIORDHT11','HUMEDAD_EXT','TEMP_EXT_DHT11']
-            reg_df = df[lista]
-            rango = len(df)-4
-            ruta = './reg_lineal_Hum_INT.pkl'
-            for i in range(rango):
-                a=regresion.predecir(reg_df.iloc[i+4],ruta_modelo=ruta)
-                a = float(a[0])
-                
-                ponderar = ponderar.append({'fecha':df.iloc[i]['Timestamp'],'real':df.iloc[i]['HUM_INT'],'prediccion':a}, ignore_index=True)
-            #--------------GRAFICAR EL DATAFRAME-------------------------
-            # Crear figura de Plotly
-            fig = go.Figure()
-
-            # Añadir líneas al gráfico
-            fig.add_trace(go.Scatter(x=ponderar['fecha'], y=ponderar['real'], mode='lines', name='real'))
-            fig.add_trace(go.Scatter(x=ponderar['fecha'], y=ponderar['prediccion'], mode='lines', name='prediccion'))
-                                    
-            # Configuración del diseño del gráfico
-            fig.update_layout(
-            title='Gráfico de Humedad Interior',
-            xaxis_title='Fecha',
-            yaxis_title='Porcentaje',
-            template='plotly_white'
-            )
         
-            # Mostrar el gráfico en Streamlit
-            st.plotly_chart(fig, use_container_width=True)
     
     
     
