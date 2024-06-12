@@ -7,6 +7,7 @@ from graficos import Grafico
 from modelos import *
 from scrap_web import Scrapero
 import plotly.graph_objects as go
+from scrapImagen import ScrapImagen
 # region conexion a la base de datos (DESCONECTADA POR AHORA)
 ########### conectar con la base de datos########################
 
@@ -21,7 +22,7 @@ import plotly.graph_objects as go
 #database.conectar()
 
 # Ejemplo de ejecución de una consulta
-#resultado = database.ejecutar_consulta("SELECT * FROM SensorData")
+#resultado = database.ejecutar_consulta("SELECT * FROM sonda_brown")
 #data = pd.DataFrame(resultado)
 #data = data.rename(columns={0:'id',1:'sensor',2:'ambiente',3:'temp_ext',4:'temp_int',
 #                    5:'hum_ext', 6:'hum_int', 7:'temp_s_ext', 8:'temp_s_int',
@@ -68,11 +69,11 @@ with st.sidebar:
         if radioButton =='Historico':
             df=data
         elif radioButton == 'Ultimas 24 horas':
-            df=data.head(97)
+            df=data.head(1440)
         elif radioButton == 'Ultimas 12 horas':
-            df=data.head(48)
+            df=data.head(720)
         elif radioButton == 'Ultima hora':
-            df=data.head(4)    
+            df=data.head(60)    
     # endregion
     # region grafico histograma y seleccion de variable comparativa
     with st.expander("Seccion 'A' variables independientes"):
@@ -110,6 +111,39 @@ grafico = Grafico()
 with st.expander('Diagrama de la disposicion de los sensores '):
     ruta="imagenes\diagrama.png"
     st.image(ruta, caption='Diagrama')
+
+
+# region IMAGENES
+with st.expander('Aqui puede seleccionar una imagen con dia y horario del arroyo'):  
+# URL de la galería
+
+    url = "https://cnclientes.online/gallery.php"
+
+    # Crear una instancia de ScrapImagen
+    scraper = ScrapImagen(url)
+
+    # Obtener la lista de imágenes
+    imagenes = scraper.obtener_imagenes()
+
+    # Crear el menú desplegable para los días
+    dias = list(imagenes.keys())
+    dia_seleccionado = st.selectbox("Selecciona un día", dias)
+
+    # Crear el menú desplegable para las horas según el día seleccionado
+    if dia_seleccionado:
+        horas = [hora for hora, _ in imagenes[dia_seleccionado]]
+        hora_seleccionada = st.selectbox("Selecciona una hora", horas)
+
+        # Mostrar la imagen seleccionada
+        if hora_seleccionada:
+            url_imagen = next(url for hora, url in imagenes[dia_seleccionado] if hora == hora_seleccionada)
+            st.image(url_imagen, caption="Imagen seleccionada")
+# endregion
+
+
+
+
+
 
 # region MAPA DE CALOR DE COORELACIONES
 
@@ -159,9 +193,9 @@ with st.expander('Visualice el grafico 1 seleccionado en el menú de la izquierd
                 st.text(f'ha elegido la variable {var_2}')
                 st.pyplot(grafico.grafico_de_linea(df['fecha'],df[columna[var_2]],'Fecha',var_2,var_2))
 
-# region GRAFICO DE LINEAS SUPERPUESTAS
+# region GRAFICO DE LINEAS 
 
-with st.expander(" Grafico de lineas superpuestas"):
+with st.expander(" Grafico de lineas "):
     
     df_l = df[['fecha','Conductividad','TEMP_agua','TEMP_aire','HUM_AIRE','ALTURA']]
 
