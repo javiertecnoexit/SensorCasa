@@ -76,7 +76,7 @@ with st.sidebar:
             df=data.head(60)    
     # endregion
     # region grafico histograma y seleccion de variable comparativa
-    with st.expander("Seccion 'A' variables independientes"):
+    with st.expander("SECCION A: Seleccione variables"):
         st.subheader("seleccion tipo de grafico")
         opcion = st.selectbox(label='',options=['Histograma','Linea'], label_visibility='hidden')
         st.subheader("Variables a comparar")
@@ -88,15 +88,15 @@ with st.sidebar:
     # endregion
     
     # grafico de dispercion
-    with st.expander("Grafico 2 Dispercion"):
+    with st.expander("SECCION B: Grafico  Dispercion"):
         st.markdown('Grafico de dispercion')
         
         elec = st.multiselect(label='Variables', options=caracteristicas, label_visibility='collapsed')
         
         
-    # sidebar grafico PCA y DBSCAN    
+    # sidebar grafico PCA y DBSCAN   b 
     
-    with st.expander("Grafico 3 PCA y DBSCAN"):
+    with st.expander("SECCION C: PCA y DBSCAN"):
         st.markdown('Analisis PCA')
         
         elec_PCA = st.multiselect(label='Variable', options=caracteristicas, label_visibility='collapsed')
@@ -170,7 +170,7 @@ with st.expander("Estadisticas basicas"):
 # endregion
   
 #graficos Histograma y de linea dentro de expansor
-with st.expander('Visualice el grafico 1 seleccionado en el menú de la izquierda'):            
+with st.expander('SECCION A : Comparacion de variables, histograma, lineas'):            
     
     col1,col2 =st.columns(2)
     if opcion == 'Histograma':
@@ -282,7 +282,7 @@ with st.expander(" Grafico de lineas "):
 
 
 # region grafico de dispersion            
-with st.expander("Grafico 2 Dispersion"):
+with st.expander("SECCION B: Grafico Dispersion"):
     if elec.__len__() >= 2:
             st.pyplot(grafico.grafico_de_dispersion(df[columna[elec[0]]],df[columna[elec[1]]],elec[0],elec[1],'Dispersion'))
     else:
@@ -296,7 +296,7 @@ for item in elec_PCA:
     listado.append(columna[item])
 datosPCA = df[listado]
 
-with st.expander(label='Grafico 3 Analisis de PCA y Cluster DBSCAN'):
+with st.expander(label='SECCION C: Analisis de PCA y Cluster DBSCAN'):
     col_pca_1,col_pca_2 = st.columns(2)
     if elec_PCA:
         with col_pca_1:
